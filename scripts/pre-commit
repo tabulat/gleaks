@@ -1,30 +1,49 @@
 #!/bin/bash
 set -e
 
-echo "🔐 [pre-commit] Starting Gitleaks scan..."
+echo "🔐 [pre-commit] Gitleaks scan started..."
 
-# 1. Check if gitleaks is enabled
+# Check if gitleaks is enabled
 ENABLED=$(git config --bool gitleaks.enable || echo "true")
 if [ "$ENABLED" != "true" ]; then
-  echo "🔕 Gitleaks hook is disabled via git config (gitleaks.enable=false)"
+  echo "🔕 Gitleaks is disabled via git config"
   exit 0
 fi
 
-# 2. Ensure gitleaks is installed
+# Check if gitleaks is installed
 if ! command -v gitleaks &>/dev/null; then
   echo "❌ Gitleaks is not installed or not found in PATH."
   echo "   Please run ./install-gitleaks-hook.sh to install it."
   exit 1
 fi
 
-# 3. Show version
+# Show version
 echo "📦 Gitleaks version: $(gitleaks version)"
+echo "🔎 Scanning files..."
 
-# 4. Run scan on staged files
-echo "🔎 Scanning staged files for secrets..."
-if ! gitleaks detect --staged --no-banner --redact; then
-  echo "❌ Commit blocked: Gitleaks detected potential secrets."
-  echo "ℹ️  You can disable this hook with: git config gitleaks.enable false"
+# Get list of staged files
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -v "^\.git/" || true)
+
+if [ -z "$FILES" ]; then
+  echo "ℹ️ No staged files to scan."
+  exit 0
+fi
+
+HAS_LEAKS=0
+
+for file in $FILES; do
+  if [ -f "$file" ]; then
+    echo "🔍 Scanning $file"
+    if ! gitleaks detect --no-git --source "$file" --no-banner --redact > /dev/null; then
+      echo "❗ Potential secrets found in: $file"
+      HAS_LEAKS=1
+    fi
+  fi
+done
+
+if [ "$HAS_LEAKS" -ne 0 ]; then
+  echo "❌ Commit blocked: Gitleaks detected secrets."
+  echo "ℹ️  You can disable the hook with: git config gitleaks.enable false"
   exit 1
 fi
 
