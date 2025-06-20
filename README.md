@@ -8,37 +8,29 @@ Integration is done via a Git `pre-commit` hook.
 
 ## 📦 Installation
 
-### 🔧 1. Install Gitleaks
+### 🔧 1. Install Gitleaks and Set Up Pre-Commit Hook
 
-> Recommended version: **8.17.0 or higher** (supports `--staged` flag)
-
-#### On Linux:
-
+To automatically install Gitleaks and configure the Git pre-commit hook, simply run the setup script:
 ```bash
-curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
-chmod +x gitleaks
-sudo mv gitleaks /usr/local/bin/
+./install-gitleaks-hook.sh
+```
+This script will:
+
+✅ Download and install the latest compatible version of Gitleaks
+
+✅ Copy the pre-commit hook to .git/hooks/pre-commit
+
+✅ Enable the hook using git config gitleaks.enable true
+
+✅ Make the hook executable
+
+💡 Make sure to run this command from the root of your Git repository.
+
+If you see a permissions error, you might need to run:
+```bash
+chmod +x install-gitleaks-hook.s
 ```
 
-#### On macOS:
-
-brew install gitleaks
-
-manually
-```bash
-curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-darwin-arm64 -o gitleaks
-chmod +x gitleaks
-sudo mv gitleaks /usr/local/bin/
-```
-
-## 2. Set Up the Pre-Commit Hook
-
-Copy the hook script into your Git hooks directory:
-```bash
-cp scripts/pre-commit .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
-```
-This enables automatic secret scanning before each commit.
 
 ## ⚙️ 3. Enable or Disable the Hook via Git Config
 
