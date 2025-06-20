@@ -1,0 +1,32 @@
+#!/bin/bash
+set -e
+
+echo "🔐 [pre-commit] Starting Gitleaks scan..."
+
+# 1. Check if gitleaks is enabled
+ENABLED=$(git config --bool gitleaks.enable || echo "true")
+if [ "$ENABLED" != "true" ]; then
+  echo "🔕 Gitleaks hook is disabled via git config (gitleaks.enable=false)"
+  exit 0
+fi
+
+# 2. Ensure gitleaks is installed
+if ! command -v gitleaks &>/dev/null; then
+  echo "❌ Gitleaks is not installed or not found in PATH."
+  echo "   Please run ./install-gitleaks-hook.sh to install it."
+  exit 1
+fi
+
+# 3. Show version
+echo "📦 Gitleaks version: $(gitleaks version)"
+
+# 4. Run scan on staged files
+echo "🔎 Scanning staged files for secrets..."
+if ! gitleaks detect --staged --no-banner --redact; then
+  echo "❌ Commit blocked: Gitleaks detected potential secrets."
+  echo "ℹ️  You can disable this hook with: git config gitleaks.enable false"
+  exit 1
+fi
+
+echo "✅ No secrets found. Proceeding with commit."
+exit 0

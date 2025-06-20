@@ -1,0 +1,6 @@
+[[rules]]
+  id = "generic-api-key"
+  description = "Generic API Key"
+  regex = '''(?i)(apikey|token|secret|key)[\s:=]+['"]?[a-z0-9]{16,45}['"]?'''
+  tags = ["key", "custom"]
+
