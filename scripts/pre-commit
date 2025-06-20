@@ -3,47 +3,58 @@ set -e
 
 echo "🔐 [pre-commit] Gitleaks scan started..."
 
-# Check if gitleaks is enabled
+# 1. Check if Gitleaks is enabled in Git config
 ENABLED=$(git config --bool gitleaks.enable || echo "true")
 if [ "$ENABLED" != "true" ]; then
-  echo "🔕 Gitleaks is disabled via git config"
+  echo "🔕 Gitleaks is disabled via git config (gitleaks.enable=false)"
   exit 0
 fi
 
-# Check if gitleaks is installed
-if ! command -v gitleaks &>/dev/null; then
-  echo "❌ Gitleaks is not installed or not found in PATH."
-  echo "   Please run ./install-gitleaks-hook.sh to install it."
+# 2. Ensure gitleaks is installed
+if ! command -v gitleaks &> /dev/null; then
+  echo "❌ Gitleaks is not installed or not in PATH."
+  echo "   Please run ./install-gitleaks-hook.sh"
   exit 1
 fi
 
-# Show version
+# 3. Show version
 echo "📦 Gitleaks version: $(gitleaks version)"
-echo "🔎 Scanning files..."
 
-# Get list of staged files
+# 4. Get staged files
 FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -v "^\.git/" || true)
 
 if [ -z "$FILES" ]; then
-  echo "ℹ️ No commit's files to scan."
+  echo "ℹ️ No staged files to scan."
   exit 0
 fi
 
+echo "📂 Scanning staged files:"
+echo "$FILES"
+
+# 5. Determine whether to use config file
+CONFIG_ARG=""
+if [ -f ".gitleaks.toml" ]; then
+  echo "⚙️  Using .gitleaks.toml config"
+  CONFIG_ARG="--config .gitleaks.toml"
+fi
+
+# 6. Scan each file individually
 HAS_LEAKS=0
 
 for file in $FILES; do
   if [ -f "$file" ]; then
     echo "🔍 Scanning $file"
-    if ! gitleaks detect --no-git --source "$file" --no-banner --redact > /dev/null; then
+    if ! gitleaks detect --no-git --source "$file" $CONFIG_ARG --no-banner --redact > /dev/null; then
       echo "❗ Potential secrets found in: $file"
       HAS_LEAKS=1
     fi
   fi
 done
 
+# 7. Result
 if [ "$HAS_LEAKS" -ne 0 ]; then
-  echo "❌ Commit blocked: Gitleaks detected secrets."
-  echo "ℹ️  You can disable the hook with: git config gitleaks.enable false"
+  echo "❌ Commit blocked: Gitleaks detected potential secrets."
+  echo "ℹ️  You can disable this hook with: git config gitleaks.enable false"
   exit 1
 fi
 
