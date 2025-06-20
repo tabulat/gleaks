@@ -18,7 +18,7 @@ Integration is done via a Git `pre-commit` hook.
 curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
 chmod +x gitleaks
 sudo mv gitleaks /usr/local/bin/
-```bash
+```
 
 #### On macOS:
 
@@ -29,7 +29,7 @@ manually
 curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-darwin-arm64 -o gitleaks
 chmod +x gitleaks
 sudo mv gitleaks /usr/local/bin/
-```bash
+```
 
 ## 2. Set Up the Pre-Commit Hook
 
@@ -37,7 +37,7 @@ Copy the hook script into your Git hooks directory:
 ```bash
 cp scripts/pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
-```bash
+```
 This enables automatic secret scanning before each commit.
 
 ## ⚙️ 3. Enable or Disable the Hook via Git Config
@@ -45,24 +45,24 @@ This enables automatic secret scanning before each commit.
 To enable:
 ```bash
 git config gitleaks.enable true
-```bash
+```
 
 To disable:
 ```bash
 git config gitleaks.enable false
-```bash
+```
 
 ## ✅ 4. Usage
 
 Stage your changes:
 ```bash
 git add .
-```bash
+```
 
 Commit:
 ```bash
 git commit -m "your message"
-```bash
+```
 If secrets are found, the commit will be blocked with an error message.
 
 ## 5. Test Example
@@ -71,7 +71,7 @@ Paste this into any file (example secret.env):
 ```bash
 AWS_SECRET_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
 GITHUB_TOKEN=ghp_1234567890abcdefghijklmnopqrstuvwxyzABCD
-```bash
+```
 Then try to commit — Gitleaks should detect it and block the commit.
 
 ## 6. Custom Configuration
@@ -84,7 +84,7 @@ Example Rule:
   description = "Generic API Key"
   regex = '''(?i)(apikey|token|secret|key)[\s:=]+['"]?[a-z0-9]{16,45}['"]?'''
   tags = ["key", "custom"]
-```bash
+```
 
 ##  7. Ignoring Files or Paths
 To ignore files or directories during scans:
@@ -95,4 +95,4 @@ Add paths or patterns to skip, e.g.:
 .env
 *.test.js
 vendor/
-```bash
+```
