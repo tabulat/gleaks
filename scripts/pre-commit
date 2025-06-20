@@ -28,7 +28,7 @@ if [ -z "$FILES" ]; then
   exit 0
 fi
 
-echo "📂 Scanning staged files:"
+echo "📂 Scanning stage files:"
 echo "$FILES"
 
 # 5. Determine whether to use config file
