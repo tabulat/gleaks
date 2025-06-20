@@ -25,7 +25,7 @@ echo "🔎 Scanning files..."
 FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -v "^\.git/" || true)
 
 if [ -z "$FILES" ]; then
-  echo "ℹ️ No staged files to scan."
+  echo "ℹ️ No commit's files to scan."
   exit 0
 fi
 
